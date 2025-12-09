@@ -4,15 +4,14 @@ import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import numpy as np
-import shutil
 
 # --- Load data ---
-INDIR="/hpc/uwork/sschiman/ICON/Plotting/"
-grid = xr.open_dataset("/hpc/uwork/fe11rea/invar/icon_grid_0026_R03B07_G.nc")
-ds = xr.open_dataset(INDIR + "fc_R03B07_rea_ml.2012022302_T2M", engine="cfgrib")
+print("Loading the grid information...")
+grid = xr.open_dataset("ICON-DREAM-Global_grid.nc")
 
 # --- Build triangulation ---
 # Get coordinates in degrees
+print("Compute triangulation...")
 lonc = np.rad2deg(grid.clon_vertices.values)
 latc = np.rad2deg(grid.clat_vertices.values)
 
@@ -48,16 +47,18 @@ ax.add_feature(cfeature.RIVERS, alpha=0.5)
 ax.set_extent([7, 13, 53, 58], crs=ccrs.PlateCarree())
 ax.set_title("ICON-DREAM-Global Grid")
 
-fig_name="/hpc/uhome/sschiman/Figures/Global_Grid_example_N_Germany.png"
+fig_name="Global_Grid_example_N_Germany.png"
 plt.tight_layout()
 plt.savefig(fig_name, dpi=300)
 plt.close()  # Close the plot to free memory
 
-shutil.copy2(fig_name, "/hpc/uwork/sschiman/TAKE_HOME/")
 
 
 
 # --- Plot T2M ---
+INDIR="./"    # Path to your data catalogue
+ds = xr.open_dataset(INDIR + "fc_R03B07_rea_ml.2012022302_T2M", engine="cfgrib")
+
 print("Plot temperature.")
 fig = plt.figure(figsize=(10, 10))
 ax = plt.axes(projection=ccrs.PlateCarree())
@@ -78,12 +79,11 @@ ax.set_extent([7, 13, 53, 58], crs=ccrs.PlateCarree())
 plt.colorbar(c, ax=ax, orientation="vertical", shrink=0.8, label="2 m Temperature [C]")
 ax.set_title("T2M, ICON-DREAM-Global Grid")
 
-fig_name="/hpc/uhome/sschiman/Figures/Global_T2M_example_N_Germany.png"
+fig_name="Global_T2M_example_N_Germany.png"
 plt.tight_layout()
 plt.savefig(fig_name, dpi=300)
 plt.close()  # Close the plot to free memory
 
-shutil.copy2(fig_name, "/hpc/uwork/sschiman/TAKE_HOME/")
 
 print("Temperature done.")
 

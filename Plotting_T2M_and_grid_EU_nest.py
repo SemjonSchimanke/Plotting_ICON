@@ -6,12 +6,12 @@ import cartopy.feature as cfeature
 import numpy as np
 
 # --- Load data ---
-INDIR="/hpc/uwork/sschiman/ICON/Plotting/"
+print("Loading the grid information...")
 grid = xr.open_dataset("ICON-DREAM-EU_grid.nc")
-ds = xr.open_dataset(INDIR + "fc_R03B08_N02_rea_ml.2012022302", engine="cfgrib")
 
 # --- Build triangulation ---
 # Get coordinates in degrees
+print("Compute triangulation...")
 lonc = np.rad2deg(grid.clon_vertices.values)
 latc = np.rad2deg(grid.clat_vertices.values)
 
@@ -27,9 +27,6 @@ triang = tri.Triangulation(lon, lat, triangles)
 # Remove triangles that cross the dateline to avoid artefacts
 mask = np.abs(np.diff(lon[triang.triangles], axis=1)).max(axis=1) > 180
 triang.set_mask(mask)
-
-# --- Data ---
-t2m = ds["t2m"].values - 273.15 
 
 
 # --- Plotting ---
@@ -56,6 +53,12 @@ plt.close()  # Close the plot to free memory
 
 
 # --- Plot T2M ---
+# --- Data ---
+INDIR="./"    # Path to your data catalogue
+ds = xr.open_dataset(INDIR + "fc_R03B08_N02_rea_ml.2012022302", engine="cfgrib")
+t2m = ds["t2m"].values - 273.15 
+
+
 print("Plot temperature. Denmark zoom.")
 fig = plt.figure(figsize=(10, 10))
 ax = plt.axes(projection=ccrs.PlateCarree())
@@ -73,15 +76,13 @@ ax.add_feature(cfeature.RIVERS, alpha=0.5)
 ax.set_extent([7, 13, 53, 58], crs=ccrs.PlateCarree())
 
 # Colorbar
-plt.colorbar(c, ax=ax, orientation="vertical", shrink=0.8, label="2 m Temperature [°C]")
+plt.colorbar(c, ax=ax, orientation="vertical", shrink=0.8, label="2 m Temperature [C]")
 ax.set_title("T2M, ICON-DREAM-EU Grid")
 
-fig_name="/hpc/uhome/sschiman/Figures/EU-Nest_T2M_example_N_Germany.png"
+fig_name="EU-Nest_T2M_example_N_Germany.png"
 plt.tight_layout()
 plt.savefig(fig_name, dpi=300)
 plt.close()  # Close the plot to free memory
-
-shutil.copy2(fig_name, "/hpc/uwork/sschiman/TAKE_HOME/")
 
 
 
